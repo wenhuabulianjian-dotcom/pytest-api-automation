@@ -13,7 +13,7 @@ jobs:
     steps:
       # 第1车间：把你的代码拉取到服务器上
       - name: 1. 拉取最新代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 第2车间：安装 Python 3.10
       - name: 2. 初始化 Python 环境
@@ -43,7 +43,7 @@ jobs:
 
       # 第7车间：把生成的报告打包存下来，供你下载查看
       - name: 7. 上传测试报告
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: allure-test-report
           path: ./allure-report
