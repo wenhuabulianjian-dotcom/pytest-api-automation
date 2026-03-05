@@ -1,0 +1,49 @@
+name: API Test Pipeline
+
+# 触发条件：只要代码推送到 master 分支，流水线就自动点火
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  test-and-report:
+    # 分配一台免费的 Ubuntu Linux 云端服务器
+    runs-on: ubuntu-latest
+
+    steps:
+      # 第1车间：把你的代码拉取到服务器上
+      - name: 1. 拉取最新代码
+        uses: actions/checkout@v3
+
+      # 第2车间：安装 Python 3.10
+      - name: 2. 初始化 Python 环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 第3车间：安装你 requirements.txt 里的依赖
+      - name: 3. 安装第三方库
+        run: |
+          pip install -r requirements.txt
+
+      # 第4车间：执行 Pytest 测试并生成 Allure 原始数据
+      - name: 4. 执行自动化测试
+        run: |
+          pytest test_opi_01.py --alluredir=./temps --clean-alluredir || true
+
+      # 第5车间：安装 Allure 命令行工具 (用 Node.js 的 npm 装最快)
+      - name: 5. 安装 Allure 渲染工具
+        run: |
+          npm install -g allure-commandline --save-dev
+
+      # 第6车间：把 temps 里的原始数据渲染成 HTML 报告
+      - name: 6. 生成 HTML 可视化报告
+        run: |
+          allure generate ./temps -o ./allure-report --clean
+
+      # 第7车间：把生成的报告打包存下来，供你下载查看
+      - name: 7. 上传测试报告
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-test-report
+          path: ./allure-report
